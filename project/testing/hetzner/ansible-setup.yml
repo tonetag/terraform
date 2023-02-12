@@ -1,0 +1,31 @@
+---
+- name: Update system and reboot
+  hosts: all
+  become: true
+  tasks:
+    - name: Update system
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+    - name: Reboot
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+
+- name: Set up Java and Quarkus
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Java
+      ansible.builtin.apt:
+        name: openjdk-17-jdk
+        state: present
+    - name: Install Quarkus CLI
+      ansible.builtin.shell: |
+        set -o pipefail
+        curl -Ls https://sh.jbang.dev | bash -s - trust add https://repo1.maven.org/maven2/io/quarkus/quarkus-cli/
+        curl -Ls https://sh.jbang.dev | bash -s - app install --fresh --force quarkus@quarkusio
+      args:
+        creates: /root/.jbang/bin/quarkus
+        executable: /bin/bash
+
+...
